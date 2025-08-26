@@ -1,0 +1,46 @@
+
+# Parâmetros do cilindro
+raio = 10             # mm
+altura_total = 5      # mm
+altura_camada = 0.2   # mm
+num_camadas = int(altura_total / altura_camada)
+
+# Coordenadas
+centro_x = 110
+centro_y = 110
+inicio_x = centro_x + raio
+inicio_y = centro_y
+
+# G-code inicial
+gcode = []
+gcode.append("; ===== Cilindro simples Ender-3 =====")
+gcode.append("G21             ; milímetros")
+gcode.append("G90             ; coordenadas absolutas")
+gcode.append("M82             ; extrusão absoluta")
+gcode.append("G28             ; home em todos os eixos")
+gcode.append("G1 Z0.2 F1200   ; altura da primeira camada")
+gcode.append("M83             ; extrusão relativa")
+gcode.append("G92 E0          ; zera extrusor")
+gcode.append("")
+gcode.append(f"; Raio = {raio} mm | Altura = {altura_total} mm | Camada = {altura_camada} mm")
+gcode.append("G1 X120 Y110 F3000   ; vai para o ponto inicial")
+gcode.append("")
+
+# Loop das camadas
+z = 0.2
+for camada in range(num_camadas):
+    gcode.append(f"; --- Camada {camada + 1} ---")
+    gcode.append(f"G2 X{centro_x - raio} Y{centro_y} I-{raio} J0 E1.0")
+    gcode.append(f"G2 X{centro_x + raio} Y{centro_y} I{raio} J0 E1.0")
+    z += altura_camada
+    gcode.append(f"G1 Z{z:.1f} F1200\n")
+
+# Finaliza
+gcode.append("M84             ; desliga motores")
+
+# Salva em arquivo
+filename = "cilindro_simples.gcode"
+with open(filename, "w") as f:
+    f.write("\n".join(gcode))
+
+print(f"G-code gerado com sucesso: {filename}")
